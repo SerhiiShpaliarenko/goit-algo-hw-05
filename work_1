@@ -1,0 +1,80 @@
+class HashTable:
+    def __init__(self, size):
+        self.size = size
+        self.table = [[] for _ in range(self.size)]
+
+    def hash_function(self, key):
+        return hash(key) % self.size
+
+    def insert(self, key, value):
+        key_hash = self.hash_function(key)
+        key_value = [key, value]
+
+        # Перевіряємо, чи існує вже такий ключ, щоб оновити значення
+        for pair in self.table[key_hash]:
+            if pair[0] == key:
+                pair[1] = value
+                return True
+        
+        # Якщо ключа немає, додаємо нову пару
+        self.table[key_hash].append(key_value)
+        return True
+
+    def get(self, key):
+        key_hash = self.hash_function(key)
+        if self.table[key_hash] is not None:
+            for pair in self.table[key_hash]:
+                if pair[0] == key:
+                    return pair[1]
+        return None
+
+    # --- Новий метод delete ---
+    def delete(self, key):
+        """
+        Видаляє пару ключ-значення з хеш-таблиці.
+        Повертає значення видаленого елемента або None, якщо ключ не знайдено.
+        """
+        key_hash = self.hash_function(key)
+        bucket = self.table[key_hash]
+
+        if bucket is None:
+            return None
+
+        # Проходимо по списку в комірці (бакеті)
+        for i in range(len(bucket)):
+            pair = bucket[i]
+            if pair[0] == key:
+                # Якщо ключ знайдено, видаляємо пару за індексом
+                removed_value = pair[1]
+                bucket.pop(i)
+                print(f"Успішно видалено ключ: {key}")
+                return removed_value
+        
+        print(f"Ключ {key} не знайдено.")
+        return None
+
+# --- Тестування роботи методу ---
+if __name__ == "__main__":
+    # Створюємо хеш-таблицю
+    ht = HashTable(5)
+
+    # Додаємо дані
+    ht.insert("apple", 10)
+    ht.insert("orange", 20)
+    ht.insert("banana", 30)
+
+    print("Початковий стан (Apple):", ht.get("apple"))
+    print("Початковий стан (Orange):", ht.get("orange"))
+    print("-" * 20)
+
+    # Видаляємо існуючий елемент
+    ht.delete("apple")
+
+    # Перевіряємо результат
+    print("Apple після видалення:", ht.get("apple"))  # Має бути None
+    print("Orange після видалення Apple:", ht.get("orange"))  # Має залишитись 20
+    
+    print("-" * 20)
+    
+    # Спроба видалити неіснуючий елемент
+    ht.delete("cherry")
